@@ -1,0 +1,143 @@
+---
+title: "Soja - Brasil "
+author: "Clauder"
+date: "21/01/2022"
+output: html_document
+
+
+#FAZER SELEÇÃO DOS DADOS
+#tratar o estado e municipio tirando o codigo do estado 
+
+#excluir algumas colunas
+
+
+#Comando para pular 4 linhas skip = 4, 
+
+# Comando para ler  a guia de numero 4 , sheet = 4
+
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, include=FALSE}
+
+library(readxl)
+
+
+#dentro do pacote dplyr tem uma função select . para selecionar algumas colunas 
+library(dplyr)
+
+#Com esse pacote posso manipular textos
+
+library(stringr)
+
+library(ggplot2)
+```
+
+```{r, include=FALSE}
+setwd("F:/R/LIMPEZA_DADOS_GAFICO/")
+```
+
+
+Tratamento dos Dados
+```{r, include=FALSE}
+
+#Utilizamos o comando PIPE %>% para fazer um tunelamneto do dataframe com as novas colunas selecionadas 
+
+
+dados <- read_excel("F:/R/LIMPEZA_DADOS_GAFICO/soja_br_2019.xlsx", skip = 4, sheet = 4) %>% 
+  
+  
+  
+  select( 2,3,6) %>% 
+#renomear as colunas
+        setNames(c("Code_Muni", "Muni", "P.Soja")) %>% 
+  
+#Remover a primeira linha
+        slice(-1) %>% 
+
+#Modicar a coluna SOJA, para números
+        
+  
+#Apareceu varios tracinho na base, seguinifica dados faltantes 
+       mutate(P.Soja=as.numeric(P.Soja),
+              
+              #Criar uma nova coluna como o nome ESTADO
+              
+              #pegar a primeira palavra de trás para frente 
+              Estado = word(Muni, start = -1), 
+              
+              #tirar os parenteses dos dados, ** A regra é contar aquantidade de caracter e escolher qual vai usar 
+              
+              Estado=str_sub(Estado, 2, 3),
+              
+#Transformar a coluna Code_Muni  em  numerico
+
+
+              Code_Muni = as.numeric(Code_Muni)
+              
+              
+              ) 
+  
+```
+
+Base de dados
+
+```{r}
+head(dados)
+```
+
+```{r}
+
+ggplot(dados, aes(x=P.Soja)+
+         geom_histogram(aes(y = ..density..)),
+                       bins = 30, fill= 'tomato',
+                       col = alpha('red',.2))+
+         geom_function()
+ 
+        
+       
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
