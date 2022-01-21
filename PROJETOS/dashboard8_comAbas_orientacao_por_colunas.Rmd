@@ -1,0 +1,76 @@
+---
+title: "DashBoard Exemplo - por LINHAS 8 com abas "
+output: 
+  flexdashboard::flex_dashboard:
+   #deixar os graficos em linha 
+    orientation: columns
+    #orientation: rows
+    vertical_layout: fill
+    
+    # Utiliza o Rows par ainteração com ambas 
+    #recomenda usar apenas 2 graficos utilizando o FILL
+    
+    #o fill transforma emgrade o Scroll em rolagem 
+
+     #O Row cria abas dentro do DashBorad - fica mis interativo
+
+
+    #column {.tabset .tabset-fade} usado para criar abas 
+    #Row {.tabset .tabset-fade}
+---
+
+column
+--------------------------------------------------------------------
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+
+```{r}
+library(knitr)#BiBlioteca para colocar uma tabela 
+kable(cars[1:6,],caption = "Fonte: Carros -  R")
+```
+
+
+
+
+
+
+
+
+
+
+
+column {.tabset .tabset-fade}
+----------------------------------------------------------
+
+
+### Gráfico 1 - Faturamento 
+
+```{r, fig.align="Fonte: Empresa x"}
+x <- c(34,35,36,3,4,5,6)
+plot(x, col='blue')
+
+```
+
+
+
+### Gráfico 2 - Custos
+
+```{r, fig.align="Fonte: Empresa x"}
+x <- c(34,35,36,3,4,5,6)
+boxplot(x, col='Grey')
+
+```
+
+
+
+
+### Gráfico 3 - Custos
+
+```{r, fig.align="Fonte: Empresa x"}
+x <- c(34,35,36,3,4,5,6)
+hist(x, col='Grey')
+
+```
+
