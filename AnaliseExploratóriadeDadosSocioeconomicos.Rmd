@@ -1,0 +1,596 @@
+---
+title: "Análise Exploratória de Dados Socioeconômicos"
+author: "CLAUDER"
+date: '2022-05-12'
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+dados <- read.csv("dataset.csv")
+```
+
+```{r}
+head(dados)
+```
+
+
+```{r}
+dim(dados)
+```
+
+```{r}
+View(dados)
+```
+
+
+```{r}
+summary(dados)
+```
+
+
+#### Analise e Exploratória dos Dados
+
+Quantas linnhas tem casos completos
+```{r}
+complete.cases <- sum(complete.cases(dados))
+complete.cases
+```
+
+Quantas Linhas tem Casos INcompletos
+
+```{r}
+not_complete_cases <- sum(!complete.cases(dados))
+not_complete_cases
+```
+
+
+
+Qual o percentual de Dados Incompletos
+
+```{r}
+percentual <- (not_complete_cases / complete.cases) * 100
+percentual 
+```
+
+
+
+Remover os objetos anteriores para liberar memória RAm
+
+```{r}
+rm(complete.cases)
+rm(not_complete_cases)
+```
+
+
+
+NOmes das colunas
+
+```{r}
+colnames(dados)
+```
+
+
+Gravar os nomes das colunas em um Vetor 
+
+
+
+```{r}
+myColumns <-  colnames(dados)
+myColumns
+
+```
+
+```{r}
+# Aideia é mudar cada elemento do vetor, colocando em português
+
+myColumns[1] <- "NomePais"
+myColumns[2] <- "Ano"
+myColumns[3] <- "IndicadorNivelVida"
+myColumns[4] <- "PIB_Per_Capita"
+myColumns[5] <- "SuporteSocial"
+myColumns[6] <- "ExpectativaVida"
+myColumns[7] <- "IndicadorLiberdade"
+myColumns[8] <- "IndicadorGenerosidade"
+myColumns[9] <- "IndicadorCorrupcao"
+myColumns[10] <- "IndicadorEmocoesPositivas"
+myColumns[11] <- "IndicadorEmocoesNegativas"
+
+
+```
+
+
+
+Verificar o Resultado
+
+```{r}
+myColumns
+```
+
+
+ Atribui os novos nomes de colunas ao dataframe
+
+```{r}
+colnames(dados) <- myColumns
+rm(myColumns)
+```
+
+
+Verificar quantos países form aincluidas na coleta de dados 
+
+```{r}
+length(unique(dados$NomePais))
+```
+
+Listar os países único e grava i resultado (antes de remover registros com valores NAs)
+
+
+
+```{r}
+list_Countries <- unique(dados$NomePais)
+list_Countries
+```
+
+
+Eliminar valores NAs
+
+```{r}
+dados <- na.omit(dados)
+
+```
+
+Dimensoes 
+
+```{r}
+dim(dados)
+```
+
+
+
+lista de países após remver valores NAs 
+
+```{r}
+list_of_countrios_without <- unique(dados$NomePais)
+list_of_countrios_without
+```
+Dimensões
+
+```{r}
+dim(dados)
+```
+
+
+Verificar quais anos estão presente nos dados
+
+```{r}
+anos <- unique(dados$Ano)
+anos
+```
+```{r}
+range(anos)
+```
+
+```{r}
+length(unique(dados$Ano))
+```
+```{r}
+rm(anos)
+```
+
+
+
+Número de Registros por Ano
+
+
+```{r}
+table(dados$Ano)
+```
+Temos a quantidade de registro por ano.
+
+
+#### Remover os anos com menor contribuição (menor Volume por ano)
+
+```{r}
+dados_por_anos <- dados[dados$Ano!=2005 & dados$Ano!=2006 & dados$Ano!=2007 & dados$Ano!=2020,]
+
+
+
+
+```
+
+Número de registro por ano 
+```{r}
+table(dados_por_anos$Ano)
+```
+Quantidade de registros por ano de 2008 a 2019
+
+
+#### Extraindo as variaveis númericas
+
+```{r}
+numeric_variable_list <- sapply(dados, is.numeric)
+
+
+numeric_data <- dados[numeric_variable_list]
+```
+
+
+
+
+#### Matriz de Corelaçaõ 
+
+```{r}
+cor(numeric_data)
+```
+
+
+Plot de Correlação 
+
+```{r}
+pairs(numeric_data)
+
+
+```
+
+
+```{r}
+pairs(numeric_data[1:5],labels = colnames(numeric_data)[1:5])
+```
+
+```{r}
+pairs(numeric_data[6:10],labels = colnames(numeric_data)[6:10])
+```
+
+
+
+##### Análise Exploratória dos Dados - Resposta às Perguntas de Negócio ##### 
+
+ ###### Organização dos Dados 
+
+Vamos realizar a análise considerando a média de indicadores por país.
+Calculamos as médias fazendo agrupamento por indicador e concatenamos os dataframes resultantes.
+
+Visualiza os dados
+
+
+
+
+Agrupando os dados e calculando média por país
+```{r}
+
+pib_per_capita_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(PIB_Per_Capita = mean(PIB_Per_Capita))
+```
+
+
+Agrupando os dados e calculando média por país
+
+```{r}
+
+suporte_social_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(SuporteSocial = mean(SuporteSocial))
+```
+
+Merge dos dataframes
+
+```{r}
+
+df_medias <- merge(pib_per_capita_pais_media, suporte_social_pais_media)
+
+
+#Perdemos a coluna tempo.. no projeto a coluna tempo não faz diferença. 
+#Mas é bom sempre terpor perto
+```
+
+```{r}
+View(df_medias)
+```
+
+
+
+
+Remover o que não estiver mais usando 
+
+```{r}
+rm(pib_per_capita_pais_media)
+rm(suporte_social_pais_media)
+```
+
+
+
+Agrupando os dados e calculando a média por país.
+
+```{r}
+ind_nivel_vida_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorNivelVida = mean(IndicadorNivelVida))
+```
+
+
+
+
+Merge
+
+```{r}
+df_medias <- merge(df_medias, ind_nivel_vida_pais_media)
+View(df_medias)
+rm(ind_nivel_vida_pais_media)
+```
+
+
+
+Agrupando os dados e calculando média por país
+```{r}
+
+expectativa_vida_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(ExpectativaVida = mean(ExpectativaVida))
+
+
+```
+
+
+
+# Merge
+```{r}
+
+df_medias <- merge(df_medias, expectativa_vida_pais_media)
+View(df_medias)
+rm(expectativa_vida_pais_media)
+```
+
+
+ Agrupando os dados e calculando média por país
+
+```{r}
+
+ind_liberdade_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorLiberdade = mean(IndicadorLiberdade))
+
+df_medias <- merge(df_medias, ind_liberdade_pais_media)
+View(df_medias)
+rm(ind_liberdade_pais_media)
+
+
+```
+
+Agrupando os dados e calculando média por país
+
+```{r}
+
+ind_generosidade_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorGenerosidade = mean(IndicadorGenerosidade))
+```
+
+
+
+Merge
+```{r}
+
+df_medias <- merge(df_medias, ind_generosidade_pais_media)
+View(df_medias)
+rm(ind_generosidade_pais_media)
+```
+
+
+
+ Agrupando os dados e calculando média por país
+```{r}
+
+ind_corrupcao_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorCorrupcao = mean(IndicadorCorrupcao))
+
+
+```
+
+
+Merge
+```{r}
+
+df_medias <- merge(df_medias, ind_corrupcao_pais_media)
+View(df_medias)
+rm(ind_corrupcao_pais_media)
+
+
+
+```
+
+
+Agrupando os dados e calculando média por país
+```{r}
+
+ind_pos_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorEmocoesPositivas = mean(IndicadorEmocoesPositivas))
+
+```
+
+# Merge
+
+```{r}
+
+df_medias <- merge(df_medias, ind_pos_pais_media)
+View(df_medias)
+rm(ind_pos_pais_media)
+
+
+```
+
+Agrupando os dados e calculando média por país
+```{r}
+
+ind_neg_pais_media <- dados %>%
+  group_by(NomePais) %>%
+  summarize(IndicadorEmocoesNegativas = mean(IndicadorEmocoesNegativas))
+
+
+```
+
+
+Merge
+```{r}
+
+df_medias <- merge(df_medias, ind_neg_pais_media)
+View(df_medias)
+rm(ind_neg_pais_media)
+dim(df_medias)
+```
+
+
+
+Respsta das perguntas de negocio 
+
+##### Pergunta 1
+O aumento do PIB per capita de um país afeta positivamente a expectativa de vida dos cidadãos ao nascer?
+
+
+Qual a correlação entre essas duas variáveis?
+
+```{r}
+
+plot(df_medias$PIB_Per_Capita, df_medias$ExpectativaVida)
+
+
+```
+Correlação:
+```{r}
+cor.test(df_medias$PIB_Per_Capita, df_medias$ExpectativaVida, method = "pearson")
+```
+
+
+#### Pergunta 2
+
+Existe uma correlação entre a escala de vida e a conscientização do público em geral sobre a corrupção nos negócios e no governo? 
+
+Qual a correlação entre essas duas variáveis?
+```{r}
+
+plot(df_medias$IndicadorNivelVida, df_medias$IndicadorCorrupcao)
+
+
+
+```
+Correlação:
+```{r}
+cor.test(df_medias$IndicadorNivelVida, df_medias$IndicadorCorrupcao, method = "pearson")
+```
+Temos uma correlação negativa, diferença de direção, aumenta uma variavel diminui a outra. Talvez não tem tanta corrupção em países desenvolvidos.
+
+
+
+
+
+
+
+#### Pergunta 3
+
+O aumento na escala de vida tem algum efeito na média de felicidade entre o público em geral?
+Qual a correlação entre essas duas variáveis?
+```{r}
+
+plot(df_medias$IndicadorNivelVida, df_medias$IndicadorEmocoesPositivas)
+
+
+
+```
+
+```{r}
+cor.test(df_medias$IndicadorNivelVida, df_medias$IndicadorEmocoesPositivas, method = "pearson")
+```
+Felicidade é uma emoção positiva, entaão vamos usar a felicidade. Temos uma correlação positva, quanto mais aumenta a escala de vida mais elizes são as pessoas.  Se a pessoa tem um bom salário se vive em um lugar bom, essa pessoa vai ter uma padrão de vida muito boa. Temos 0.57 em correlação, isso que dizer que temos uma boa correlação.
+
+
+
+
+
+
+#### Pergunta 4
+O país com o menor índice de suporte social tem maior percepção de corrupção em relação às empresas e ao governo no país?
+
+
+Indicadores
+```{r}
+
+
+#Temos que aplicar um filtro. Esse filtro foi criado.
+
+# Indicadores
+df_medias[df_medias$SuporteSocial == min(df_medias$SuporteSocial),]#se o suporte social for igual a suporte social a virgula que dizer que eu quero todas as linhas
+df1 <- df_medias[df_medias$NomePais == "Central African Republic",]
+#foi criando um novo dataframe 
+
+View(df1)
+df1$SuporteSocial
+df1$IndicadorCorrupcao
+max(df_medias$SuporteSocial)
+max(df_medias$IndicadorCorrupcao)
+
+
+```
+
+
+Plot e Estatísticas
+```{r}
+# 
+df2 <- dados[dados$NomePais == "Central African Republic",]
+View(df2)
+plot(df2$SuporteSocial, df2$IndicadorEmocoesPositivas)
+
+
+
+```
+
+Correlação
+
+```{r}
+cor.test(df2$SuporteSocial, df2$IndicadorEmocoesPositivas, method = "pearson")
+```
+
+
+#### Pergunta 5
+Pessoas generosas são mais felizes?
+
+
+```{r}
+
+plot(df_medias$IndicadorGenerosidade, df_medias$IndicadorEmocoesPositivas)
+
+```
+
+```{r}
+cor.test(df_medias$IndicadorGenerosidade, df_medias$IndicadorEmocoesPositivas, method = "pearson")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
